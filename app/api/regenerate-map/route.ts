@@ -6,17 +6,24 @@ const execAsync = promisify(exec);
 
 export async function POST() {
   try {
-    const { stdout, stderr } = await execAsync('node scripts/generate-static-map.js');
+    // Générer les deux cartes
+    const [normalMap, denseMap] = await Promise.all([
+      execAsync('node scripts/generate-static-map.js'),
+      execAsync('node scripts/generate-dense-map.js')
+    ]);
     
-    if (stderr) {
-      console.error('Erreur lors de la régénération:', stderr);
-      return NextResponse.json({ error: stderr }, { status: 500 });
+    if (normalMap.stderr || denseMap.stderr) {
+      console.error('Erreur lors de la régénération:', normalMap.stderr || denseMap.stderr);
+      return NextResponse.json({ error: normalMap.stderr || denseMap.stderr }, { status: 500 });
     }
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Carte régénérée avec succès',
-      output: stdout 
+      message: 'Cartes régénérées avec succès',
+      output: {
+        normal: normalMap.stdout,
+        dense: denseMap.stdout
+      }
     });
   } catch (error) {
     console.error('Erreur lors de la régénération:', error);
