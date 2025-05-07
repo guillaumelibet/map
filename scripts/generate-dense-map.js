@@ -51,15 +51,38 @@ const html = `
         .marker-cluster-large div {
             background-color: rgba(241, 128, 23, 0.6);
         }
+        .marker-cluster-huge {
+            background-color: rgba(241, 128, 23, 0.8);
+        }
+        .marker-cluster-huge div {
+            background-color: rgba(240, 12, 12, 0.8);
+        }
         .custom-marker {
-            width: 8px !important;
-            height: 8px !important;
-            margin-left: -4px !important;
-            margin-top: -4px !important;
-            background-color: #3388ff;
-            border: 2px solid #fff;
-            border-radius: 50%;
+            position: relative;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        .custom-marker::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -10px;
+            width: 20px;
+            height: 20px;
+            background-color: #ff0000;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
             box-shadow: 0 0 4px rgba(0,0,0,0.3);
+        }
+        .custom-marker::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -2px;
+            width: 4px;
+            height: 4px;
+            background-color: #000;
+            border-radius: 50%;
         }
     </style>
 </head>
@@ -82,8 +105,8 @@ const html = `
         // Créer une icône personnalisée pour les marqueurs individuels
         const customIcon = L.divIcon({
             className: 'custom-marker',
-            iconSize: [8, 8],
-            iconAnchor: [4, 4]
+            iconSize: [0, 0],
+            iconAnchor: [0, 0]
         });
         
         // Créer un groupe de marqueurs avec un clustering moins agressif
@@ -99,7 +122,8 @@ const html = `
             iconCreateFunction: function(cluster) {
                 const count = cluster.getChildCount();
                 let size = 'small';
-                if (count > 100) size = 'large';
+                if (count > 2000) size = 'huge';
+                else if (count > 100) size = 'large';
                 else if (count > 50) size = 'medium';
                 
                 return L.divIcon({
